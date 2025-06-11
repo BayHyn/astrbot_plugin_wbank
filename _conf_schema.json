@@ -1,0 +1,9 @@
+{
+    "words_limit": {
+        "description": "每个关键词允许的词条数",
+        "type": "int",
+        "hint": "超过此限制将无法继续添加",
+        "default": "10"
+    }
+
+}
