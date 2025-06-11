@@ -35,8 +35,6 @@ git clone https://github.com/Zhalslar/astrbot_plugin_wbank
 
 ### 命令表
 
-# 自定义词库插件命令表（`astrbot_plugin_wbank`）
-
 | 命令             | 功能说明                                       |
 |------------------|------------------------------------------------|
 | 添加词条 关键词 内容     | 向指定关键词添加一个新的词条（回复内容）                 |
@@ -53,6 +51,10 @@ git clone https://github.com/Zhalslar/astrbot_plugin_wbank
 
 ![13bfe1bb4cca835fff78beef843ef0a](https://github.com/user-attachments/assets/552c12ab-812a-4235-a543-2d20f73ff3db)
 
+
+### 直接编辑词库
+
+词库存储在“data\plugin_data\astrbot_plugin_wbank\default_word_bank.json”，可直接打开编辑（建议用编程软件编辑，不要用记事本）
 
 ## 👥 贡献指南
 
