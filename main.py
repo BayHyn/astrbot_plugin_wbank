@@ -1,9 +1,11 @@
+import asyncio
 from astrbot.api.star import Context, Star, register
 from astrbot.core import AstrBotConfig
 from astrbot.core.platform import AstrMessageEvent
 from astrbot.api.event import filter
 from astrbot.api.star import StarTools
 import os
+from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import AiocqhttpMessageEvent
 
 from data.plugins.astrbot_plugin_wbank.data import KeywordReplyDB
 
@@ -11,7 +13,7 @@ from data.plugins.astrbot_plugin_wbank.data import KeywordReplyDB
 @register(
     name="astrbot_plugin_wbank",
     desc="动态词库，自定义回复词",
-    version="v1.0.0",
+    version="v1.0.1",
     author="Zhalslar",
     repo="https://github.com/Zhalslar/astrbot_plugin_wbank",
 )
@@ -21,7 +23,8 @@ class WbankPlugin(Star):
         plugin_data_dir = StarTools.get_data_dir("astrbot_plugin_wbank")
         self.word_bank_file = os.path.join(plugin_data_dir, "default_word_bank.json")
         self.db = KeywordReplyDB(self.word_bank_file)
-        self.words_limit = int(config.get("words_limit", 10))
+        self.words_limit = config.get("words_limit", 10)
+        self.delete_msg_time = config.get("delete_msg_time", 0)
 
     @filter.command("添加词条")
     @filter.permission_type(filter.PermissionType.ADMIN)
@@ -158,4 +161,23 @@ class WbankPlugin(Star):
         group_id = str(event.get_group_id())
         msg = event.message_str.strip()
         if reply := self.db.get_reply(keyword=msg, group_id=group_id):
-            yield event.plain_result(reply)
+            await self.send(event, message=reply)
+            event.stop_event()
+
+    async def send(self, event: AstrMessageEvent, message: str):
+        """发送消息"""
+        if event.get_platform_name() != "aiocqhttp":
+            await event.send(event.plain_result(message))
+            return
+        else:
+            # OneBot 11 API “send_msg”可以获取到消息 ID，从而撤回消息
+            assert isinstance(event, AiocqhttpMessageEvent)
+            group_id = event.get_group_id()
+            client = event.bot
+            message_id = (
+                await client.send_msg(group_id=int(group_id), message=message)
+            ).get("message_id")
+            if  self.delete_msg_time > 0:
+                await asyncio.sleep(self.delete_msg_time)
+                await client.delete_msg(message_id=message_id)
+
