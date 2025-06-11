@@ -5,7 +5,9 @@ from astrbot.core.platform import AstrMessageEvent
 from astrbot.api.event import filter
 from astrbot.api.star import StarTools
 import os
-from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import AiocqhttpMessageEvent
+from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
+    AiocqhttpMessageEvent,
+)
 
 from data.plugins.astrbot_plugin_wbank.data import KeywordReplyDB
 
@@ -13,7 +15,7 @@ from data.plugins.astrbot_plugin_wbank.data import KeywordReplyDB
 @register(
     name="astrbot_plugin_wbank",
     desc="动态词库，自定义回复词",
-    version="v1.0.2",
+    version="v1.0.3",
     author="Zhalslar",
     repo="https://github.com/Zhalslar/astrbot_plugin_wbank",
 )
@@ -25,6 +27,7 @@ class WbankPlugin(Star):
         self.db = KeywordReplyDB(self.word_bank_file)
         self.words_limit = config.get("words_limit", 10)
         self.delete_msg_time = config.get("delete_msg_time", 0)
+        self.need_prefix = config.get("need_prefix", True)
 
     @filter.command("添加词条")
     @filter.permission_type(filter.PermissionType.ADMIN)
@@ -156,11 +159,11 @@ class WbankPlugin(Star):
     @filter.event_message_type(filter.EventMessageType.GROUP_MESSAGE)
     async def handle_message(self, event: AstrMessageEvent):
         """监听群消息自动触发关键词回复"""
-        if not event.is_at_or_wake_command:
+        if self.need_prefix and not event.is_at_or_wake_command:
             return
-        group_id = str(event.get_group_id())
-        msg = event.message_str.strip()
-        if reply := self.db.get_reply(keyword=msg, group_id=group_id):
+        if reply := self.db.get_reply(
+            keyword=event.message_str.strip(), group_id=event.get_group_id()
+        ):
             await self.send(event, reply)
 
     async def send(self, event: AstrMessageEvent, message: str):
@@ -178,7 +181,6 @@ class WbankPlugin(Star):
                 await client.send_msg(group_id=int(group_id), message=message)
             ).get("message_id")
             event.stop_event()
-            if  self.delete_msg_time > 0:
+            if self.delete_msg_time > 0:
                 await asyncio.sleep(self.delete_msg_time)
                 await client.delete_msg(message_id=message_id)
-

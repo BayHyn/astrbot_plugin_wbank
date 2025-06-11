@@ -10,6 +10,11 @@
             "type": "int",
             "hint": "0表示不撤回消息, 不允许超过120秒, 否则无法撤回",
             "default": 0
+    },
+    "need_prefix": {
+        "description": "是否需要前缀唤醒bot",
+        "type": "bool",
+        "hint": "",
+        "default": true
     }
-
 }
