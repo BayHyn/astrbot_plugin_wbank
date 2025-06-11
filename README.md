@@ -43,6 +43,9 @@ git clone https://github.com/Zhalslar/astrbot_plugin_wbank
 
 ### 示例图
 
+![13bfe1bb4cca835fff78beef843ef0a](https://github.com/user-attachments/assets/552c12ab-812a-4235-a543-2d20f73ff3db)
+
+
 ## 👥 贡献指南
 
 - 🌟 Star 这个项目！（点右上角的星星，感谢支持！）
